@@ -14,12 +14,18 @@ class ChatController extends Controller
 
             $message = $request->input('message');
 
-            $response = Http::timeout(60)->post(
-                'https://small-chat-ml-service.onrender.com/chat',
-                [
-                    'message' => $message
-                ]
-            );
+$response = Http::timeout(60)->post(
+    'https://small-chat-ml-service.onrender.com/chat',
+    [
+        'message' => $message
+    ]
+);
+
+return response()->json([
+    'status' => $response->status(),
+    'body' => $response->body(),
+    'json' => $response->json(),
+]);
 
             $answer = $response->json()['response'];
 
