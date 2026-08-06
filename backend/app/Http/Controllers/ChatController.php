@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Chat;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class ChatController extends Controller
@@ -11,39 +11,36 @@ class ChatController extends Controller
     public function chat(Request $request)
     {
         try {
+            $message = trim((string) $request->input('message', ''));
 
-            $message = $request->input('message');
+            if ($message === '') {
+                return response()->json([
+                    'error' => 'Message is required.',
+                ], 422);
+            }
 
-$response = Http::timeout(60)->post(
-    'https://small-chat-ml-service.onrender.com/chat',
-    [
-        'message' => $message
-    ]
-);
+            $response = Http::timeout(60)->post(
+                'https://small-chat-ml-service.onrender.com/chat',
+                [
+                    'message' => $message,
+                ]
+            );
 
-return response()->json([
-    'status' => $response->status(),
-    'body' => $response->body(),
-    'json' => $response->json(),
-]);
-
-            $answer = $response->json()['response'];
+            $payload = $response->json();
+            $answer = $payload['response'] ?? 'Sorry, I could not generate a response.';
 
             Chat::create([
                 'message' => $message,
-                'response' => $answer
+                'response' => $answer,
             ]);
 
-            return [
-                'response' => $answer
-            ];
-
-        } catch (\Exception $e) {
-
             return response()->json([
-                'error' => $e->getMessage()
+                'response' => $answer,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
             ], 500);
-
         }
     }
 }
