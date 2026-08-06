@@ -12,22 +12,18 @@ class ChatController extends Controller
     {
         $message = $request->input('message');
 
-
         // Send message to Python ML chatbot
-        $response = Http::post('http://127.0.0.1:8001/chat', [
+        $response = Http::post('https://small-chat-ml-service.onrender.com/chat', [
             'message' => $message
         ]);
 
-
         $answer = $response->json()['response'];
-
 
         // Save conversation to Neon PostgreSQL
         Chat::create([
             'message' => $message,
             'response' => $answer
         ]);
-
 
         return [
             'response' => $answer
