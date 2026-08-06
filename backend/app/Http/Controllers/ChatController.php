@@ -1,15 +1,8 @@
-<?php
+use Illuminate\Support\Facades\Log;
 
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Models\Chat;
-use Illuminate\Support\Facades\Http;
-
-class ChatController extends Controller
+public function chat(Request $request)
 {
-    public function chat(Request $request)
-    {
+    try {
         $message = $request->input('message');
 
         $response = Http::timeout(60)->post(
@@ -29,5 +22,10 @@ class ChatController extends Controller
         return [
             'response' => $answer
         ];
+    } catch (\Exception $e) {
+        Log::error($e->getMessage());
+        return response()->json([
+            'error' => $e->getMessage()
+        ], 500);
     }
 }
