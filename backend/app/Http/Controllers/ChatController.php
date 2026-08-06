@@ -20,26 +20,34 @@ class ChatController extends Controller
             );
 
             if (! $response->successful()) {
+                $body = $response->body();
+
                 Log::error('ML service request failed', [
                     'status' => $response->status(),
-                    'body' => $response->body(),
+                    'body' => $body,
                 ]);
 
                 return response()->json([
                     'error' => 'ML service returned an error',
+                    'ml_status' => $response->status(),
+                    'ml_body' => $body,
                 ], 502);
             }
 
             $data = $response->json();
 
             if (! is_array($data) || ! array_key_exists('response', $data)) {
+                $body = $response->body();
+
                 Log::error('Invalid ML service response', [
                     'status' => $response->status(),
-                    'body' => $response->body(),
+                    'body' => $body,
                 ]);
 
                 return response()->json([
                     'error' => 'Invalid response from ML service',
+                    'ml_status' => $response->status(),
+                    'ml_body' => $body,
                 ], 502);
             }
 
